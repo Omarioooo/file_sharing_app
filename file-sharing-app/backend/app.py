@@ -4,13 +4,21 @@ from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'projectcloud1234'
 
-# إعدادات S3
-S3_BUCKET = 'your-bucket-name'
-S3_REGION = 'your-region'  # مثال: 'us-east-1'
+# s3 setting
+S3_BUCKET = 'file-sharing-app-omariooo'
+S3_REGION = 'us-east-1'
 
 s3 = boto3.client('s3')
+
+# Allowed files
+ALLOWED_EXTENSIONS = {'.pdf', '.jpg', '.png', '.txt'}
+
+# checking allowed files
+def allowed_file(filename):
+    return '.' in filename and os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/')
 def index():
@@ -27,6 +35,10 @@ def upload_file():
         flash("Error: No selected file")
         return redirect(url_for('index'))
 
+    if not allowed_file(file.filename):
+        flash("Error: File type not allowed. Only .pdf, .jpg, .png, and .txt are allowed.")
+        return redirect(url_for('index'))
+
     filename = secure_filename(file.filename)
     s3.upload_fileobj(file, S3_BUCKET, filename)
 
@@ -40,4 +52,4 @@ def list_files():
     return render_template('files.html', files=files, bucket=S3_BUCKET, region=S3_REGION)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=80)
