@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 import mimetypes
 
 app = Flask(__name__)
-BUCKET = 'upload-bucket-abdo'
+BUCKET = 'file-sharing-app-omariooo'
 s3 = boto3.client('s3')
 MAX_SIZE_MB = 10
 
