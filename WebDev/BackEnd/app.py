@@ -1,21 +1,21 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import boto3
-from config import AWS_ACCESS_KEY, AWS_SECRET_KEY, S3_BUCKET_NAME
 from werkzeug.utils import secure_filename
 import os
+from config import AWS_ACCESS_KEY, AWS_SECRET_KEY, S3_BUCKET_NAME
+from datetime import datetime
 
 app = Flask(__name__)
-
-# Configuration
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB limit
-ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'docx', 'xlsx'}
 
-# S3 Client
+# Initialize S3 client
 s3 = boto3.client(
     's3',
     aws_access_key_id=AWS_ACCESS_KEY,
     aws_secret_access_key=AWS_SECRET_KEY
 )
+
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'docx', 'xlsx'}
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -30,30 +30,33 @@ def upload_file():
     if 'file' not in request.files:
         return jsonify({'success': False, 'error': 'No file part'})
     
-    files = request.files.getlist('file')
-    results = []
-    
-    for file in files:
-        if file.filename == '':
-            results.append({'success': False, 'error': 'No selected file'})
-            continue
-            
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            try:
-                s3.upload_fileobj(
-                    file,
-                    S3_BUCKET_NAME,
-                    filename,
-                    ExtraArgs={'ACL': 'public-read'}
-                )
-                results.append({'success': True, 'filename': filename})
-            except Exception as e:
-                results.append({'success': False, 'error': str(e)})
-        else:
-            results.append({'success': False, 'error': 'File type not allowed'})
-    
-    return jsonify({'success': all(r['success'] for r in results), 'results': results})
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No selected file'})
+        
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        try:
+            s3.upload_fileobj(
+                file,
+                S3_BUCKET_NAME,
+                filename,
+                ExtraArgs={'ACL': 'public-read'}
+            )
+            download_url = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': S3_BUCKET_NAME, 'Key': filename},
+                ExpiresIn=3600
+            )
+            return jsonify({
+                'success': True,
+                'filename': filename,
+                'download_url': download_url
+            })
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)})
+    else:
+        return jsonify({'success': False, 'error': 'File type not allowed'})
 
 @app.route('/files')
 def list_files():
@@ -77,7 +80,7 @@ def download_file(filename):
         url = s3.generate_presigned_url(
             'get_object',
             Params={'Bucket': S3_BUCKET_NAME, 'Key': filename},
-            ExpiresIn=3600  # 1 hour
+            ExpiresIn=3600
         )
         return redirect(url)
     except Exception as e:
@@ -92,4 +95,4 @@ def delete_file(filename):
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
