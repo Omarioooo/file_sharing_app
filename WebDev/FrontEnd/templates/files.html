@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block title %}My Files{% endblock %}
+
+{% block content %}
+<div class="files-container">
+    <h2>Your Uploaded Files</h2>
+    
+    {% if files %}
+    <div class="file-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Size</th>
+                    <th>Uploaded</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td>{{ file.name }}</td>
+                    <td>{{ file.size }}</td>
+                    <td>{{ file.last_modified }}</td>
+                    <td>
+                        <a href="{{ url_for('download_file', filename=file.name) }}" class="btn-download">Download</a>
+                        <button class="btn-delete" data-filename="{{ file.name }}">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-files">
+        <p>No files uploaded yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete button clicks
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filename = this.getAttribute('data-filename');
+            
+            if (confirm(`Are you sure you want to delete ${filename}?`)) {
+                fetch(`/delete/${filename}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.closest('tr').remove();
+                    } else {
+                        alert('Error deleting file: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

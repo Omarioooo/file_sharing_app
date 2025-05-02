@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+
+{% block title %}Upload Files{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <h2>Upload Your Files</h2>
+    
+    <form id="uploadForm" action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+        <div class="file-drop-area">
+            <span class="file-msg">Choose files or drag them here</span>
+            <input class="file-input" type="file" name="file" multiple>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn-upload">Upload to S3</button>
+        </div>
+    </form>
+    
+    <div id="uploadStatus" class="status-message"></div>
+    
+    <div class="file-requirements">
+        <h3>Supported File Types:</h3>
+        <ul>
+            <li>PDF (.pdf)</li>
+            <li>Images (.jpg, .png, .gif)</li>
+            <li>Text (.txt)</li>
+            <li>Documents (.docx, .xlsx)</li>
+        </ul>
+        <p>Max file size: 10MB</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('.file-input');
+    const fileMsg = document.querySelector('.file-msg');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadStatus = document.getElementById('uploadStatus');
+    
+    // Handle file selection display
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            if (this.files.length === 1) {
+                fileMsg.textContent = this.files[0].name;
+            } else {
+                fileMsg.textContent = `${this.files.length} files selected`;
+            }
+        }
+    });
+    
+    // Handle drag and drop
+    const dropArea = document.querySelector('.file-drop-area');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+        dropArea.classList.add('highlight');
+    }
+    
+    function unhighlight() {
+        dropArea.classList.remove('highlight');
+    }
+    
+    dropArea.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        fileInput.files = dt.files;
+        if (fileInput.files.length === 1) {
+            fileMsg.textContent = fileInput.files[0].name;
+        } else {
+            fileMsg.textContent = `${fileInput.files.length} files selected`;
+        }
+    }
+    
+    // Handle form submission
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        uploadStatus.textContent = 'Uploading...';
+        uploadStatus.className = 'status-message uploading';
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                uploadStatus.textContent = 'Upload successful!';
+                uploadStatus.className = 'status-message success';
+                fileMsg.textContent = 'Choose files or drag them here';
+                fileInput.value = '';
+            } else {
+                uploadStatus.textContent = data.error || 'Upload failed';
+                uploadStatus.className = 'status-message error';
+            }
+        })
+        .catch(error => {
+            uploadStatus.textContent = 'Error: ' + error.message;
+            uploadStatus.className = 'status-message error';
+        });
+    });
+});
+</script>
+{% endblock %}
