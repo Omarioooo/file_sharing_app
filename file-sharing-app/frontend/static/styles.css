@@ -1,0 +1,102 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+.upload-container, .files-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 300px;
+}
+
+.upload-container h2, .files-container h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.5em;
+}
+
+.upload-container form {
+    margin-bottom: 15px;
+}
+
+.upload-container input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+.upload-container button, .files-container button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.upload-container #uploadButton {
+    background-color: #007bff;
+    color: white;
+}
+
+.upload-container #uploadButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.upload-container #viewFilesButton, .files-container button {
+    background-color: #007bff;
+    color: white;
+}
+
+.message-area {
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+.message-area p {
+    margin: 5px 0;
+}
+
+.message-area .message {
+    color: green;
+    word-wrap: break-word;
+}
+
+.message-area .error {
+    color: red;
+}
+
+.file-list {
+    margin-top: 15px;
+    text-align: left;
+}
+
+.file-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.file-list li {
+    margin: 10px 0;
+}
+
+.file-list a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.file-list a:hover {
+    text-decoration: underline;
+}

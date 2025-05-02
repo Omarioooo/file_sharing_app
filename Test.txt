@@ -1,0 +1,11 @@
+- Connect to EC2
+ssh -i "..\FileSharingKey.pem" ec2-user@54.84.42.169
+
+- S3 testing
+aws s3 ls
+
+- check network connection
+ping 8.8.8.8
+
+- check port 80 for app
+sudo netstat -tuln | grep 80
