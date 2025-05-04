@@ -10,7 +10,7 @@ def is_allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Create Flask app and set folders for static and template files
-app = Flask(__name__, static_folder='../../frontend/static', template_folder='../../frontend/template')
+app = Flask(__name__, static_folder='../frontend/static', template_folder='../frontend/template')
 
 # Serve front-end files
 @app.route('/')
