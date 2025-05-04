@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+.env
+backend/.env
+
+# SSH keys
+*.pem
+
+# Virtual environments
+venv/
+.env/
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+temp/
+
+# Python package builds
+dist/
+build/
+*.egg-info/
+
+# GitHub Actions artifacts
+.github/workflows/*.cache
+
+# Local development files
+*.bak
+*.swp
+*~
+
+# Sensitive configuration files
+*.key
+*.cert
+*.crt
+*.csr
+
+# Project-specific sensitive directories
+backend/uploads/
