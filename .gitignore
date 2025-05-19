@@ -10,6 +10,7 @@ backend/.env
 
 # SSH keys
 *.pem
+FileSharingKey.pem
 
 # Virtual environments
 venv/
